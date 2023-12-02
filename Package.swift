@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 
 import PackageDescription
 
@@ -15,8 +15,8 @@ let package = Package(
             targets: ["BCCrypto", "BCWally", "CryptoBase", "SSKR"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/WolfMcNally/WolfBase", from: "5.0.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.4.1"),
+        .package(url: "https://github.com/WolfMcNally/WolfBase", from: "6.0.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.0"),
         .package(url: "https://github.com/BlockchainCommons/secp256k1-zkp.swift.git", from: "0.5.0"),
     ],
     targets: [
