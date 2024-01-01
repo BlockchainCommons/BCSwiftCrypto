@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/WolfMcNally/WolfBase", from: "6.0.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.0"),
         .package(url: "https://github.com/BlockchainCommons/secp256k1-zkp.swift.git", from: "0.5.0"),
+        .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.2.0"),
     ],
     targets: [
         .target(
@@ -28,6 +29,7 @@ let package = Package(
                 "SSKR",
                 "CryptoBase",
                 .product(name: "secp256k1", package: "secp256k1-zkp.swift"),
+                .product(name: "Blake2", package: "Blake2.swift"),
             ]),
         .binaryTarget(
             name: "BCWally",

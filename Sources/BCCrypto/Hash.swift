@@ -1,6 +1,35 @@
 import Foundation
 import CryptoBase
 import CryptoKit
+import Blake2
+
+/// Computes the Blake2b digest of the input buffer.
+public func blake2b<D1, D2>(_ data: D1, key: D2?, len: Int = 64) -> Data
+where D1: DataProtocol, D2: DataProtocol
+{
+    let dataPtr: any DataPtrRepresentable
+    if let dataAsDataPtr = data as? (any DataPtrRepresentable) {
+        dataPtr = dataAsDataPtr
+    } else {
+        dataPtr = Data(data)
+    }
+    if let keyAsDataPtr = key as? (any DataPtrRepresentable) {
+        return try! Blake2b.hash(size: len, data: dataPtr, key: keyAsDataPtr)
+    } else {
+        if key == nil {
+            return try! Blake2b.hash(size: len, data: dataPtr, key: nil as Data?)
+        } else {
+            return try! Blake2b.hash(size: len, data: dataPtr, key: Data(key!))
+        }
+    }
+}
+
+/// Computes the Blake2b digest of the input buffer.
+public func blake2b<D>(_ data: D, len: Int = 64) -> Data
+where D: DataProtocol
+{
+    return blake2b(data, key: nil as Data?, len: len)
+}
 
 /// Computes the SHA-256 digest of the input buffer.
 public func sha256<D: DataProtocol>(_ data: D) -> Data {

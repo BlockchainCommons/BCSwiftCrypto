@@ -3,6 +3,40 @@ import BCCrypto
 import WolfBase
 
 final class HashTests: XCTestCase {
+    func testBlake2b() {
+        let key = ‡"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+        
+        //
+        // Keyed
+        //
+        
+        /// From: https://github.com/BLAKE2/BLAKE2/blob/master/testvectors/blake2b-kat.txt
+        XCTAssertEqual(blake2b(
+            ‡"",
+            key: key
+        ), ‡"10ebb67700b1868efb4417987acf4690ae9d972fb7a590c2f02871799aaa4786b5e996e8f0f4eb981fc214b005f42d2ff4233499391653df7aefcbc13fc51568")
+
+        /// From: https://github.com/BLAKE2/BLAKE2/blob/master/testvectors/blake2b-kat.txt
+        XCTAssertEqual(blake2b(
+            ‡"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40414243444546474849",
+            key: key
+        ), ‡"dfb320c44f9d41d1efdcc015f08dd5539e526e39c87d509ae6812a969e5431bf4fa7d91ffd03b981e0d544cf72d7b1c0374f8801482e6dea2ef903877eba675e")
+
+        //
+        // Unkeyed
+        //
+        
+        /// From: https://github.com/emilbayes/blake2b/blob/master/test-vectors.json
+        XCTAssertEqual(blake2b(
+            ‡""
+        ), ‡"786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce")
+
+        /// From: https://github.com/emilbayes/blake2b/blob/master/test-vectors.json
+        XCTAssertEqual(blake2b(
+            ‡"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f"
+        ), ‡"31a046f7882ffe6f83ce472e9a0701832ec7b3f76fbcfd1df60fe3ea48fde1651254247c3fd95e100f9172731e17fd5297c11f4bb328363ca361624a81af797c")
+    }
+    
     func testSHA() {
         let input = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
         let digest256 = sha256(input.utf8Data)
