@@ -29,7 +29,7 @@ public extension SSKRShare {
     }
     
     var identifierHex: String {
-        Data(data[0...1]).hex
+        Data(data[0...1]).hexString
     }
 
     var groupThreshold: Int {

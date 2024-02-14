@@ -44,7 +44,7 @@ func toHex(data: Data) -> String {
 }
 
 extension Data {
-    var hex: String {
+    var hexString: String {
         toHex(data: self)
     }
 }
