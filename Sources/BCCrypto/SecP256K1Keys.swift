@@ -1,30 +1,30 @@
 import Foundation
 import BCWally
 
-public let ecdsaPrivateKeySize = 32
-public let ecdsaPublicKeySize = 33
-public let ecdsaPublicKeyUncompressedSize = 65
+public let secp256k1PrivateKeySize = 32
+public let secp256k1PublicKeySize = 33
+public let secp256k1PublicKeyUncompressedSize = 65
 
-public func ecdsaNewPrivateKey() -> Data {
+public func secp256k1NewPrivateKey() -> Data {
     var rng = SecureRandomNumberGenerator()
-    return ecdsaNewPrivateKey(using: &rng)
+    return secp256k1NewPrivateKey(using: &rng)
 }
 
-public func ecdsaNewPrivateKey<T>(using rng: inout T) -> Data
+public func secp256k1NewPrivateKey<T>(using rng: inout T) -> Data
     where T: RandomNumberGenerator
 {
     return rng.randomData(32)
 }
 
-public func ecdsaPublicKeyFromPrivateKey<D: DataProtocol>(privateKey: D) -> Data {
+public func secp256k1PublicKeyFromPrivateKey<D: DataProtocol>(privateKey: D) -> Data {
     Wally.ecPublicKeyFromPrivateKey(data: Data(privateKey))
 }
 
-public func ecdsaDecompressPublicKey<D: DataProtocol>(compressedPublicKey: D) -> Data {
+public func secp256k1DecompressPublicKey<D: DataProtocol>(compressedPublicKey: D) -> Data {
     Wally.ecPublicKeyDecompress(data: Data(compressedPublicKey))
 }
 
-public func ecdsaCompressPublicKey<D: DataProtocol>(uncompressedPublicKey: D) -> Data {
+public func secp256k1CompressPublicKey<D: DataProtocol>(uncompressedPublicKey: D) -> Data {
     let data = Data(uncompressedPublicKey)
     precondition(data.count == 65)
     precondition(data[0] == 0x04)
@@ -39,11 +39,11 @@ public func ecdsaCompressPublicKey<D: DataProtocol>(uncompressedPublicKey: D) ->
     }
 }
 
-public func ecdsaDerivePrivateKey<D: DataProtocol>(keyMaterial: D) -> Data {
+public func secp256k1DerivePrivateKey<D: DataProtocol>(keyMaterial: D) -> Data {
     hkdfHMACSHA256(keyMaterial: keyMaterial, salt: "signing".utf8Data, keyLen: 32)
 }
 
-public func schnorrPublicKeyFromPrivateKey<D: DataProtocol>(privateKey: D) -> Data {
+public func secp256k1SchnorrPublicKeyFromPrivateKey<D: DataProtocol>(privateKey: D) -> Data {
     let kp = LibSecP256K1.keyPair(from: Data(privateKey))!
     let x = LibSecP256K1.schnorrPublicKey(from: kp)
     return LibSecP256K1.serialize(key: x)

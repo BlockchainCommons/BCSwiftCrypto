@@ -18,7 +18,7 @@
 | Symmetric Encryption | IETF-ChaCha20-Poly1305 | CryptoSwift
 | Shamir's Secret Sharing | SSKR | Blockchain Commons SSKR
 | Key Agreement | X25519 | Apple CryptoKit
-| Signing/Verification | ECDSA | LibSecP256K1
+| Signing/Verification | SecP256K1 ECDSA | LibSecP256K1
 | Signing/Verification | Schnorr | LibSecP256K1
 | Secure Random Number Generation | NA | Apple Security
 | Wallet Import Format (WIF) | NA | LibWally
