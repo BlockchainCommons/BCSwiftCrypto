@@ -1,5 +1,6 @@
 import Foundation
 import BCWally
+import BCRandom
 
 public enum Secp256k1 {
     public static let privateKeySize = 32

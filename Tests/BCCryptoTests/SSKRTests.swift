@@ -1,5 +1,6 @@
 import XCTest
 import BCCrypto
+import BCRandom
 
 final class SSKRTests: XCTestCase {
     func test1() throws {

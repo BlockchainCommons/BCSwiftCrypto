@@ -1,6 +1,7 @@
 import XCTest
 import BCCrypto
 import WolfBase
+import BCRandom
 
 final class Secp256k1Tests: XCTestCase {
     func testKeys() {

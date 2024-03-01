@@ -1,5 +1,6 @@
 import Foundation
 import SSKR
+import BCRandom
 
 public func splitSSKR<D: DataProtocol>(groupThreshold: Int, groups: [(Int, Int)], secret: D, testRNG: @escaping RandomDataFunc = secureRandomData) throws -> [[SSKRShare]] {
     try SSKRGenerate(groupThreshold: groupThreshold, groups: sskrGroups(groups), secret: Data(secret), randomGenerator: testRNG)

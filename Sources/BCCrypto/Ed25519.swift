@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import BCRandom
 
 public enum Ed25519 {
     public static let privateKeySize = 32

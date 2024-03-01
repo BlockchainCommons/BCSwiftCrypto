@@ -1,6 +1,7 @@
 import XCTest
 import BCCrypto
 import WolfBase
+import BCRandom
 
 // Test vector from: https://datatracker.ietf.org/doc/html/rfc8439#section-2.8.2
 fileprivate let plaintext = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.".utf8Data

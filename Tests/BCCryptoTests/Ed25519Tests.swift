@@ -1,6 +1,7 @@
 import XCTest
 import BCCrypto
 import WolfBase
+import BCRandom
 
 final class Ed25519KeysTests: XCTestCase {
     func testEd25519Keys() {

@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import BCRandom
 
 public enum X25519 {
     public static let agreementPrivateKeySize = 32
