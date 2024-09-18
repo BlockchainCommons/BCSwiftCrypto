@@ -1,4 +1,5 @@
 import Foundation
+import BCRandom
 import secp256k1
 
 public enum LibSecP256K1 {
@@ -179,93 +180,81 @@ public extension LibSecP256K1 {
         }
         return pubKey
     }
-    
-    /// Compute a tagged hash as defined in BIP-340.
-    ///
-    /// SHA256(SHA256(tag)||SHA256(tag)||msg)
-    static func taggedSHA256(msg: Data, tag: Data) -> Data {
-        let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_NONE))!
-        defer { secp256k1_context_destroy(context) }
 
-        let hashCount = 32
-        var hash = Data(repeating: 0, count: hashCount)
-        let tagCount = tag.count
-        let msgCount = msg.count
-        
-        hash.withUnsafeMutableByteBuffer { hash in
-            tag.withUnsafeByteBuffer { tag in
-                msg.withUnsafeByteBuffer { msg in
-                    _ = secp256k1_tagged_sha256(context, hash.baseAddress!, tag.baseAddress!, tagCount, msg.baseAddress!, msgCount)
-                }
-            }
-        }
-        
-        return hash
+    static func schnorrSign(
+        keyPair: secp256k1_keypair,
+        msg: Data
+    ) -> Data {
+        var rng = SecureRandomNumberGenerator()
+        return schnorrSignUsing(keyPair: keyPair, msg: msg, rng: &rng)
     }
     
-    static func schnorrSign32<T>(msg32: Data, keyPair: secp256k1_keypair, rng: inout T) -> Data
-    where T: RandomNumberGenerator
-    {
-        let msgCount = 32
-        precondition(msg32.count == msgCount)
-        
+    static func schnorrSignUsing<T: RandomNumberGenerator>(
+        keyPair: secp256k1_keypair,
+        msg: Data,
+        rng: inout T
+    ) -> Data {
+        let auxRand = rng.randomData(32)
+        return schnorrSignWithAuxRand(keyPair: keyPair, msg: msg, auxRand: auxRand)
+    }
+
+    static func schnorrSignWithAuxRand(
+        keyPair: secp256k1_keypair,
+        msg: Data,
+        auxRand: Data
+    ) -> Data {
         let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN))!
         defer { secp256k1_context_destroy(context) }
 
-        let randomizeCount = 32
-        let randomize = rng.randomData(randomizeCount)
-
-        randomize.withUnsafeByteBuffer {
-            _ = secp256k1_context_randomize(context, $0.baseAddress!)
-        }
-
+        var auxRand = auxRand;
+        var keyPair = keyPair;
         let sigCount = 64
         var sig64 = Data(repeating: 0, count: sigCount)
-        
-        let auxRandCount = 32
-        let auxRand = rng.randomData(auxRandCount)
+        let msgCount = msg.count
 
         sig64.withUnsafeMutableByteBuffer { sig64 in
-            msg32.withUnsafeByteBuffer { msg32 in
-                withUnsafePointer(to: keyPair) { keyPair in
-                    auxRand.withUnsafeByteBuffer { auxRand in
-                        _ = secp256k1_schnorrsig_sign32(context, sig64.baseAddress!, msg32.baseAddress!, keyPair, auxRand.baseAddress)
-                    }
+            msg.withUnsafeByteBuffer { msg in
+                auxRand.withUnsafeMutableByteBuffer { auxRand in
+                    var params = secp256k1_schnorrsig_extraparams(
+                        magic: (0xda, 0x6f, 0xb3, 0x8c),
+                        noncefp: nil,
+                        ndata: auxRand.baseAddress
+                    )
+                    
+                    _ = secp256k1_schnorrsig_sign_custom(
+                        context,
+                        sig64.baseAddress!,
+                        msg.baseAddress!,
+                        msgCount,
+                        &keyPair,
+                        &params
+                    )
                 }
             }
         }
             
         return sig64
     }
-    
-    static func schnorrSign<T>(msg: Data, tag: Data, keyPair: secp256k1_keypair, rng: inout T) -> Data
-    where T: RandomNumberGenerator
-    {
-        let digest = taggedSHA256(msg: msg, tag: tag)
-        return schnorrSign32(msg32: digest, keyPair: keyPair, rng: &rng)
-    }
-    
-    static func schnorrVerify32(msg32: Data, signature: Data, publicKey: secp256k1_xonly_pubkey) -> Bool {
-        let msg32Count = 32
-        precondition(msg32.count == msg32Count)
 
+    static func schnorrVerify(
+        publicKey: secp256k1_xonly_pubkey,
+        signature: Data,
+        msg: Data
+    ) -> Bool {
         precondition(signature.count == 64)
         
         let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))!
         defer { secp256k1_context_destroy(context) }
 
+        let msgCount = msg.count
+        
         let result: Int32 = signature.withUnsafeByteBuffer { signature in
-            msg32.withUnsafeByteBuffer { msg32 in
+            msg.withUnsafeByteBuffer { msg in
                 withUnsafePointer(to: publicKey) { publicKey in
-                    secp256k1_schnorrsig_verify(context, signature.baseAddress!, msg32.baseAddress!, msg32Count, publicKey)
+                    secp256k1_schnorrsig_verify(context, signature.baseAddress!, msg.baseAddress!, msgCount, publicKey)
                 }
             }
         }
         return result == 1
-    }
-    
-    static func schnorrVerify(msg: Data, tag: Data, signature: Data, publicKey: secp256k1_xonly_pubkey) -> Bool {
-        let msg32 = taggedSHA256(msg: msg, tag: tag)
-        return schnorrVerify32(msg32: msg32, signature: signature, publicKey: publicKey)
     }
 }

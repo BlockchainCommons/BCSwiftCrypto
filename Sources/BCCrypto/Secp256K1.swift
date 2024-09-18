@@ -58,34 +58,83 @@ public extension Secp256k1.ECDSA {
         LibSecP256K1.ecdsaSign(message: Data(message), secKey: Data(privateKey))
     }
     
-    static func verify<D1, D2, D3>(publicKey: D1, signature: D2, message: D3) -> Bool
+    static func verify<D1, D2, D3>(publicKey: D1, signature: D2, message: D3) throws -> Bool
     where D1: DataProtocol, D2: DataProtocol, D3: DataProtocol
     {
-        precondition(signature.count == 64)
-        let signature = LibSecP256K1.ecdsaSignature(from: Data(signature))!
-        let publicKey = LibSecP256K1.ecPublicKey(from: Data(publicKey))!
+        guard
+            signature.count == 64,
+            let signature = LibSecP256K1.ecdsaSignature(from: Data(signature))
+        else {
+            throw CryptoError.invalidSignature
+        }
+        guard let publicKey = LibSecP256K1.ecPublicKey(from: Data(publicKey)) else {
+            throw CryptoError.invalidPublicKey
+        }
         return LibSecP256K1.ecdsaVerify(message: Data(message), signature: signature, publicKey: publicKey)
     }
 }
 
 public extension Secp256k1.Schnorr {
-    static func derivePublicKey<D: DataProtocol>(privateKey: D) -> Data {
-        let kp = LibSecP256K1.keyPair(from: Data(privateKey))!
+    static func derivePublicKey<D: DataProtocol>(privateKey: D) throws -> Data {
+        guard let kp = LibSecP256K1.keyPair(from: Data(privateKey)) else {
+            throw CryptoError.invalidPrivateKey
+        }
         let x = LibSecP256K1.schnorrPublicKey(from: kp)
         return LibSecP256K1.serialize(key: x)
     }
     
-    static func sign<D1, D2, D3, T>(privateKey: D1, message: D2, tag: D3, rng: inout T) -> Data
-    where D1: DataProtocol, D2: DataProtocol, D3: DataProtocol, T: RandomNumberGenerator
+    static func sign<D1, D2>(
+        privateKey: D1,
+        message: D2
+    ) throws -> Data
+    where D1: DataProtocol, D2: DataProtocol
     {
-        let kp = LibSecP256K1.keyPair(from: Data(privateKey))!
-        return LibSecP256K1.schnorrSign(msg: Data(message), tag: Data(tag), keyPair: kp, rng: &rng)
+        guard let kp = LibSecP256K1.keyPair(from: Data(privateKey)) else {
+            throw CryptoError.invalidPrivateKey
+        }
+        return LibSecP256K1.schnorrSign(keyPair: kp, msg: Data(message))
     }
-
-    static func verify<D1, D2, D3, D4>(schnorrPublicKey: D1, signature: D2, message: D3, tag: D4) -> Bool
-    where D1: DataProtocol, D2: DataProtocol, D3: DataProtocol, D4: DataProtocol
+    
+    static func signUsing<D1, D2, T>(
+        privateKey: D1,
+        message: D2,
+        rng: inout T
+    ) throws -> Data
+    where D1: DataProtocol, D2: DataProtocol, T: RandomNumberGenerator
     {
-        let publicKey = LibSecP256K1.schnorrPublicKey(from: Data(schnorrPublicKey))!
-        return LibSecP256K1.schnorrVerify(msg: Data(message), tag: Data(tag), signature: Data(signature), publicKey: publicKey)
+        guard let kp = LibSecP256K1.keyPair(from: Data(privateKey)) else {
+            throw CryptoError.invalidPrivateKey
+        }
+        return LibSecP256K1.schnorrSignUsing(keyPair: kp, msg: Data(message), rng: &rng)
+    }
+    
+    static func signWithAuxRand<D1, D2, D3>(
+        privateKey: D1,
+        message: D2,
+        auxRand: D3
+    ) throws -> Data
+    where D1: DataProtocol, D2: DataProtocol, D3: DataProtocol
+    {
+        guard let kp = LibSecP256K1.keyPair(from: Data(privateKey)) else {
+            throw CryptoError.invalidPrivateKey
+        }
+        return LibSecP256K1.schnorrSignWithAuxRand(
+            keyPair: kp,
+            msg: Data(message),
+            auxRand: Data(auxRand)
+        )
+    }
+    
+    static func verify<D1, D2, D3>(
+        schnorrPublicKey: D1,
+        signature: D2,
+        message: D3
+    ) throws -> Bool
+    where D1: DataProtocol, D2: DataProtocol, D3: DataProtocol
+    {
+        guard let publicKey = LibSecP256K1.schnorrPublicKey(from: Data(schnorrPublicKey)) else {
+            throw CryptoError.invalidPublicKey
+        }
+        return LibSecP256K1.schnorrVerify(publicKey: publicKey, signature: Data(signature), msg: Data(message))
     }
 }

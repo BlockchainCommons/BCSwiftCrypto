@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "bcswiftrandom",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/BlockchainCommons/BCSwiftRandom",
+      "state" : {
+        "revision" : "51ead8f55f8bbe5906d1e83279abc5944864873f",
+        "version" : "1.0.0"
+      }
+    },
+    {
       "identity" : "blake2.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tesseract-one/Blake2.swift.git",
