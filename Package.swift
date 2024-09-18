@@ -15,11 +15,11 @@ let package = Package(
             targets: ["BCCrypto", "BCWally", "CryptoBase", "SSKR"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/WolfMcNally/WolfBase", from: "6.0.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.8.0"),
-        .package(url: "https://github.com/BlockchainCommons/secp256k1-zkp.swift", from: "0.5.0"),
-        .package(url: "https://github.com/BlockchainCommons/BCSwiftRandom", from: "1.0.0"),
-        .package(url: "https://github.com/tesseract-one/Blake2.swift", from: "0.2.0"),
+        .package(url: "https://github.com/WolfMcNally/WolfBase.git", from: "6.0.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.0"),
+        .package(url: "https://github.com/BlockchainCommons/secp256k1-zkp.swift.git", from: "0.5.0"),
+        .package(url: "https://github.com/BlockchainCommons/BCSwiftRandom.git", from: "1.0.0"),
+        .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.2.0"),
     ],
     targets: [
         .target(

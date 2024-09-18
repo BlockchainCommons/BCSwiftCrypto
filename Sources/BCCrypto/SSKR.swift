@@ -58,7 +58,8 @@ public extension SSKRShare {
     }
 }
 
-extension SSKRShare: Hashable {
+extension SSKRShare: @retroactive Equatable {}
+extension SSKRShare: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(data)
     }
