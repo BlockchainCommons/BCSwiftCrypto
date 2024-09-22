@@ -1,53 +1,54 @@
-import XCTest
+import Testing
 import BCCrypto
 import WolfBase
 import BCRandom
+import Foundation
 
-final class Secp256k1Tests: XCTestCase {
-    func testKeys() throws {
+struct Secp256k1Tests {
+    @Test func testKeys() throws {
         var rng = makeFakeRandomNumberGenerator()
         let privateKey = Secp256k1.newPrivateKey(using: &rng)
-        XCTAssertEqual(privateKey, ‡"7eb559bbbf6cce2632cf9f194aeb50943de7e1cbad54dcfab27a42759f5e2fed")
+        #expect(privateKey == ‡"7eb559bbbf6cce2632cf9f194aeb50943de7e1cbad54dcfab27a42759f5e2fed")
         let publicKey = Secp256k1.ECDSA.derivePublicKey(privateKey: privateKey)
-        XCTAssertEqual(publicKey, ‡"0271b92b6212a79b9215f1d24efb9e6294a1bedc95b6c8cf187cb94771ca02626b")
+        #expect(publicKey == ‡"0271b92b6212a79b9215f1d24efb9e6294a1bedc95b6c8cf187cb94771ca02626b")
         
         let decompressed = Secp256k1.ECDSA.uncompressPublicKey(compressedPublicKey: publicKey)
-        XCTAssertEqual(decompressed, ‡"0471b92b6212a79b9215f1d24efb9e6294a1bedc95b6c8cf187cb94771ca02626b72325f1f3bb69a44d3f1cb6d1fd488220dd502f49c0b1a46cb91ce3718d8334a")
+        #expect(decompressed == ‡"0471b92b6212a79b9215f1d24efb9e6294a1bedc95b6c8cf187cb94771ca02626b72325f1f3bb69a44d3f1cb6d1fd488220dd502f49c0b1a46cb91ce3718d8334a")
         
         let compressed = Secp256k1.ECDSA.compressPublicKey(uncompressedPublicKey: decompressed)
-        XCTAssertEqual(compressed, publicKey)
+        #expect(compressed == publicKey)
         
         let xOnly = try Secp256k1.Schnorr.derivePublicKey(privateKey: privateKey)
-        XCTAssertEqual(xOnly, ‡"71b92b6212a79b9215f1d24efb9e6294a1bedc95b6c8cf187cb94771ca02626b")
+        #expect(xOnly == ‡"71b92b6212a79b9215f1d24efb9e6294a1bedc95b6c8cf187cb94771ca02626b")
         
         let derivedPrivateKey = Secp256k1.derivePrivateKey(keyMaterial: "password".utf8Data)
-        XCTAssertEqual(derivedPrivateKey, ‡"05cc550daa75058e613e606d9898fedf029e395911c43273a208b7e0e88e271b")
+        #expect(derivedPrivateKey == ‡"05cc550daa75058e613e606d9898fedf029e395911c43273a208b7e0e88e271b")
     }
     
-    func testECDSASigning() throws {
+    @Test func testECDSASigning() throws {
         var rng = makeFakeRandomNumberGenerator()
         let privateKey = Secp256k1.newPrivateKey(using: &rng)
         let message = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.".utf8Data
         
         let secp256k1PublicKey = Secp256k1.ECDSA.derivePublicKey(privateKey: privateKey)
         let secp256k1Signature = Secp256k1.ECDSA.sign(privateKey: privateKey, message: message)
-        XCTAssertEqual(secp256k1Signature, ‡"e75702ed8f645ce7fe510507b2403029e461ef4570d12aa440e4f81385546a13740b7d16878ff0b46b1cbe08bc218ccb0b00937b61c4707de2ca6148508e51fb")
-        XCTAssertTrue(try Secp256k1.ECDSA.verify(publicKey: secp256k1PublicKey, signature: secp256k1Signature, message: message))
+        #expect(secp256k1Signature == ‡"e75702ed8f645ce7fe510507b2403029e461ef4570d12aa440e4f81385546a13740b7d16878ff0b46b1cbe08bc218ccb0b00937b61c4707de2ca6148508e51fb")
+        #expect(try Secp256k1.ECDSA.verify(publicKey: secp256k1PublicKey, signature: secp256k1Signature, message: message))
     }
     
-    func testSchnorrSign() throws {
+    @Test func testSchnorrSign() throws {
         var rng = makeFakeRandomNumberGenerator()
         let privateKey = Secp256k1.newPrivateKey(using: &rng)
-        XCTAssertEqual(privateKey, ‡"7eb559bbbf6cce2632cf9f194aeb50943de7e1cbad54dcfab27a42759f5e2fed")
+        #expect(privateKey == ‡"7eb559bbbf6cce2632cf9f194aeb50943de7e1cbad54dcfab27a42759f5e2fed")
         let message = "Hello World".utf8Data
         let signature = try Secp256k1.Schnorr.signUsing(
             privateKey: privateKey,
             message: message,
             rng: &rng
         )
-        XCTAssertEqual(signature, ‡"8f6ec4edbe1a6d96edfc5f15e18e06a6e2559a3426c52d2c38fec17fe7e0cafc95177206d018662a279f2b571224cf07006939fc25d0cae7a7e7b44a4b25f543")
+        #expect(signature == ‡"8f6ec4edbe1a6d96edfc5f15e18e06a6e2559a3426c52d2c38fec17fe7e0cafc95177206d018662a279f2b571224cf07006939fc25d0cae7a7e7b44a4b25f543")
         let schnorrPublicKey = try Secp256k1.Schnorr.derivePublicKey(privateKey: privateKey)
-        XCTAssertTrue(try Secp256k1.Schnorr.verify(
+        #expect(try Secp256k1.Schnorr.verify(
             schnorrPublicKey: schnorrPublicKey,
             signature: signature,
             message: message
@@ -71,28 +72,28 @@ final class Secp256k1Tests: XCTestCase {
         do {
             if let privateKey = testVector.privateKey, let auxRand = testVector.auxRand {
                 let actualPublicKey = try Secp256k1.Schnorr.derivePublicKey(privateKey: privateKey)
-                XCTAssertEqual(actualPublicKey, testVector.publicKey)
+                #expect(actualPublicKey == testVector.publicKey)
                 let actualSignature = try Secp256k1.Schnorr.signWithAuxRand(
                     privateKey: privateKey,
                     message: testVector.message,
                     auxRand: auxRand
                 )
-                XCTAssertEqual(actualSignature, testVector.signature)
+                #expect(actualSignature == testVector.signature)
             }
             let verified = try Secp256k1.Schnorr.verify(
                 schnorrPublicKey: testVector.publicKey,
                 signature: testVector.signature,
                 message: testVector.message
             )
-            XCTAssertEqual(verified, testVector.verifies)
+            #expect(verified == testVector.verifies)
         } catch {
             if testVector.verifies {
-                XCTFail("\(error)")
+                Issue.record("\(error)")
             }
         }
     }
     
-    func test0() throws {
+    @Test func test0() throws {
         try runTestVector(TestVector(
             privateKey: ‡"0000000000000000000000000000000000000000000000000000000000000003",
             publicKey: ‡"F9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9",
@@ -103,7 +104,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test1() throws {
+    @Test func test1() throws {
         try runTestVector(TestVector(
             privateKey: ‡"B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF",
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -114,7 +115,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
 
-    func test2() throws {
+    @Test func test2() throws {
         try runTestVector(TestVector(
             privateKey: ‡"C90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B14E5C9",
             publicKey: ‡"DD308AFEC5777E13121FA72B9CC1B7CC0139715309B086C960E18FD969774EB8",
@@ -125,7 +126,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test3() throws {
+    @Test func test3() throws {
         try runTestVector(TestVector(
             privateKey: ‡"0B432B2677937381AEF05BB02A66ECD012773062CF3FA2549E44F58ED2401710",
             publicKey: ‡"25D1DFF95105F5253C4022F628A996AD3A0D95FBF21D468A1B33F8C160D8F517",
@@ -136,7 +137,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test4() throws {
+    @Test func test4() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"D69C3509BB99E412E68B0FE8544E72837DFA30746D8BE2AA65975F29D22DC7B9",
@@ -148,7 +149,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // public key not on the curve
-    func test5() throws {
+    @Test func test5() throws {
         try self.runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"EEFDEA4CDB677750A420FEE807EACF21EB9898AE79B9768766E4FAA04A2D4A34",
@@ -160,7 +161,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // has_even_y(R) is false
-    func test6() throws {
+    @Test func test6() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -172,7 +173,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // negated message
-    func test7() throws {
+    @Test func test7() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -184,7 +185,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // negated s value
-    func test8() throws {
+    @Test func test8() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -196,7 +197,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // sG - eP is infinite. Test fails in single verification if has_even_y(inf) is defined as true and x(inf) as 0
-    func test9() throws {
+    @Test func test9() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -208,7 +209,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // sG - eP is infinite. Test fails in single verification if has_even_y(inf) is defined as true and x(inf) as 1
-    func test10() throws {
+    @Test func test10() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -220,7 +221,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // sig[0:32] is not an X coordinate on the curve
-    func test11() throws {
+    @Test func test11() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -232,7 +233,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // sig[0:32] is equal to field size
-    func test12() throws {
+    @Test func test12() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -244,7 +245,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // sig[32:64] is equal to curve order
-    func test13() throws {
+    @Test func test13() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
@@ -256,7 +257,7 @@ final class Secp256k1Tests: XCTestCase {
     }
     
     // public key is not a valid X coordinate because it exceeds the field size
-    func test14() throws {
+    @Test func test14() throws {
         try runTestVector(TestVector(
             privateKey: nil,
             publicKey: ‡"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC30",
@@ -267,7 +268,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test15() throws {
+    @Test func test15() throws {
         try runTestVector(TestVector(
             privateKey: ‡"0340034003400340034003400340034003400340034003400340034003400340",
             publicKey: ‡"778CAA53B4393AC467774D09497A87224BF9FAB6F6E68B23086497324D6FD117",
@@ -278,7 +279,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test16() throws {
+    @Test func test16() throws {
         try runTestVector(TestVector(
             privateKey: ‡"0340034003400340034003400340034003400340034003400340034003400340",
             publicKey: ‡"778CAA53B4393AC467774D09497A87224BF9FAB6F6E68B23086497324D6FD117",
@@ -289,7 +290,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test17() throws {
+    @Test func test17() throws {
         try runTestVector(TestVector(
             privateKey: ‡"0340034003400340034003400340034003400340034003400340034003400340",
             publicKey: ‡"778CAA53B4393AC467774D09497A87224BF9FAB6F6E68B23086497324D6FD117",
@@ -300,7 +301,7 @@ final class Secp256k1Tests: XCTestCase {
         ))
     }
     
-    func test18() throws {
+    @Test func test18() throws {
         try runTestVector(TestVector(
             privateKey: ‡"0340034003400340034003400340034003400340034003400340034003400340",
             publicKey: ‡"778CAA53B4393AC467774D09497A87224BF9FAB6F6E68B23086497324D6FD117",

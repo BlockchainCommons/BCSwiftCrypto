@@ -1,12 +1,13 @@
 {
+  "originHash" : "a341e4102d3c0366773270637eb3318897e71167cc03570b51d4671ec481aefa",
   "pins" : [
     {
       "identity" : "bcswiftrandom",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/BlockchainCommons/BCSwiftRandom",
       "state" : {
-        "revision" : "51ead8f55f8bbe5906d1e83279abc5944864873f",
-        "version" : "1.0.0"
+        "revision" : "f24bcb01e79ce82b6d10fc2f70f12bb8b3e6d23f",
+        "version" : "2.0.0"
       }
     },
     {
@@ -59,10 +60,10 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/WolfMcNally/WolfBase",
       "state" : {
-        "revision" : "91c8cad45e6325ab76db1b5b60c5f6616d52a0cb",
-        "version" : "6.0.0"
+        "revision" : "b2515098bb6f46a8c0386b383b0ed9282828d1c4",
+        "version" : "7.0.0"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
